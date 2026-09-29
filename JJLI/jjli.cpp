@@ -125,7 +125,8 @@ private:
                 tar++;
                 pc++;
             }
-            ptr = tar - 1;
+            ptr = (tar > 0) ? tar - 1 : 0;
+            if (ptr >= tape.size()) tape.resize(ptr + 1024, 0);
         } else if (prog[pc] == '>') {
             ptr++;
             pc++;
