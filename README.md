@@ -16,7 +16,7 @@ Brainf\*\*\* arrived in 1993 with eight fundamental instructions and a tape-base
 - Inspects the active cell's numeric value with `$`, without changing it.
 - Selects between single-instruction branches using `==` or `!=` conditions.
 - Expands memory dynamically as programs grow and ambitions become questionable.
-- Supports end-of-line comments and whitespace for readable source.
+- Uses whitespace for readable source; comments are not supported.
 
 ## Get started
 
@@ -149,22 +149,12 @@ The first line is the comparison, the second is the true branch, and the third i
 > [!IMPORTANT]
 > **Each conditional branch executes one instruction in the current JJLI implementation.** Expanded formatting improves readability; it does not turn a branch into a multi-instruction block.
 
-### Add comments and whitespace
+### Use whitespace carefully
 
-Comments begin with `#` and continue to the end of the line. JJLI ignores them during execution:
+Whitespace separates instructions and makes source easier to read. It does not change the program's execution.
 
-```jjl
-# Initialize comparison values
-
-@ +++++
-@@ +++++
-
-# Compare the values
-
-@ $ == @@ : @@@ : @@@@
-```
-
-Whitespace separates instructions and makes source easier to read. Canonical JJL uses spacing and comments to explain assignments and conditions without changing the instruction model.
+> [!CAUTION]
+> **Comments are not supported by JJLI.** The interpreter ignores unrecognized characters, but it still executes any recognized JJL instruction characters that appear in supposed comment text. For example, in `# add + to the cell`, the `+` is still executed. Any other JJL instruction symbol in supposed comment text can also change the program. Do not add comments to `.jjl` source files.
 
 ## Reference
 
@@ -295,18 +285,6 @@ Use dedicated opening and closing brackets with two-space indentation for longer
 
 The indentation makes the loop body visible without changing execution.
 
-#### Separate complex conditional branches
-
-Use the expanded form when a comparison or its branches becomes difficult to read on one line:
-
-```jjl
-$ == @@
-: @@@
-: @@@@
-```
-
-Keep the condition and its two branches visually distinct. Each branch still executes one instruction.
-
 ## Examples
 
 ### Select an ASCII Y or N
@@ -368,7 +346,7 @@ The program demonstrates the full workflow:
 - Memory addresses are zero-based, and negative pointer positions are not allowed.
 - Dynamic expansion grows the tape in blocks of 1,024 cells from its initial 32,768-cell size.
 - Conditional branches execute one instruction, whether written on one line or three.
-- Comments run from `#` to the end of the line; whitespace is available for readability.
+- Whitespace is available for readability, but comments are not supported. Unrecognized characters are ignored individually; recognized JJL instructions inside supposed comments are still executed.
 - Brainf\*\*\* programs using the standard eight instructions do not need the extensions.
 
 ## Design notes
