@@ -1,48 +1,57 @@
 # Jobless Joke Language (JJL)
 
-### An esoteric programming language with slightly fewer inconveniences.
+**Eight familiar instructions. A few extra tricks. Still very much a tape.**
 
-Welcome to **Jobless Joke Language (JJL)**, an esoteric programming language inspired by the classic Brainf*** programming language.
+Jobless Joke Language, or **JJL**, is an esoteric programming language inspired by Brainf\*\*\*. Its interpreter is **JJLI**, the Jobless Joke Language Interpreter.
 
-Originally introduced in 1993, Brainf*** established a remarkably minimalist approach to programming through eight fundamental instructions and a tape-based memory model.
+Brainf\*\*\* arrived in 1993 with eight fundamental instructions and a tape-based memory model. JJL keeps that compact foundation and adds absolute memory navigation, multiplier arithmetic, non-destructive inspection, and inline conditions. You still get close control over what the computer does, along with the occasional opportunity to wonder why you chose this hobby.
 
-JJL builds upon that foundation with a few additional conveniences:
+[What it does](#what-it-does) · [Get started](#get-started) · [A quick example](#a-quick-example) · [How it fits together](#how-it-fits-together) · [Reference](#reference) · [Examples](#examples) · [Good to know](#good-to-know) · [Design notes](#design-notes)
 
-- **Absolute memory navigation** through `@` sequences.
-- **Multiplier arithmetic** using `*` chains.
-- **Non-destructive memory inspection** with `$`.
-- **Inline conditional expressions** supporting equality and inequality.
-- **Dynamic memory expansion** for growing programs and questionable ambitions.
+## What it does
 
-JJL preserves the simplicity of its predecessor while introducing additional control over memory access and arithmetic.
+- Preserves the eight standard Brainf\*\*\* instructions and their tape-based execution model.
+- Jumps to absolute memory addresses with repeated `@` symbols.
+- Builds arithmetic in multiples of ten with `*` chains.
+- Inspects the active cell's numeric value with `$`, without changing it.
+- Selects between single-instruction branches using `==` or `!=` conditions.
+- Expands memory dynamically as programs grow and ambitions become questionable.
+- Supports end-of-line comments and whitespace for readable source.
 
-It is intentionally compact, unconventional, and designed for programmers who enjoy understanding exactly what their computer is doing.
+## Get started
 
-Or at least pretending they do.
-
----
-
-## 1. Interpreter
-
-JJL is executed through **JJLI (Jobless Joke Language Interpreter)**.
-
-JJLI interprets `.jjl` source files directly, executing instructions against a dynamically expandable memory tape.
-
-### Running a Program
+JJLI executes `.jjl` source files directly:
 
 ```bash
 ./jjl program.jjl
 ```
 
-JJL source files use the `.jjl` extension.
+Use the `.jjl` extension for your source files. The interpreter reads the source and executes instructions sequentially against its expandable memory tape, including JJL's extended navigation, arithmetic, and conditional operations.
 
-The interpreter processes the source and executes its instructions sequentially, including its extended navigation, arithmetic, and conditional operations.
+> [!NOTE]
+> The command above is the documented interpreter invocation. The supplied project documentation does not include a build or installation procedure, so this README starts from an available `jjl` executable.
 
----
+## A quick example
 
-## 2. Memory Model
+Start at Cell 0, add 80, subtract 2, and print the resulting ASCII character:
 
-JJL uses a dynamically expandable tape consisting of unsigned 8-bit memory cells.
+```jjl
+@ +********-- .
+```
+
+Output:
+
+```text
+N
+```
+
+There are eight `*` symbols in the arithmetic chain: `+********` adds 80, and `--` adjusts it to 78, the ASCII value for `N`. The `.` instruction prints the character; it does not print the numeric value `78`.
+
+## How it fits together
+
+### The memory tape
+
+JJL uses a dynamically expandable tape of unsigned 8-bit cells:
 
 | Property | Behavior |
 |---|---|
@@ -54,59 +63,13 @@ JJL uses a dynamically expandable tape consisting of unsigned 8-bit memory cells
 | Expansion | 1,024 cells |
 | Initial pointer | Cell 0 |
 
-Each cell stores a value between 0 and 255.
+Each cell holds a value from 0 through 255. Arithmetic wraps: incrementing 255 produces 0, and decrementing 0 produces 255. The tape begins with 32,768 cells and expands in blocks of 1,024 cells.
 
-Incrementing a cell containing 255 wraps its value to 0. Decrementing a cell containing 0 wraps it to 255.
+Addresses use zero-based indexing, and the pointer starts at Cell 0. It cannot move to a negative position.
 
-The tape uses zero-based indexing.
+### Jump directly to an address
 
-The memory pointer cannot move to a negative position.
-
----
-
-## 3. Instruction Set
-
-JJL retains the eight fundamental instructions of Brainf*** while introducing additional operators for memory navigation, inspection, arithmetic, and conditional execution.
-
-### 3.1 Standard Instructions
-
-| Instruction | Operation | Description |
-|---|---|---|
-| `>` | Move right | Advance the memory pointer by one cell. |
-| `<` | Move left | Move the memory pointer back by one cell. |
-| `+` | Increment | Increase the active cell by one. |
-| `-` | Decrement | Decrease the active cell by one. |
-| `.` | Output | Print the active cell as an ASCII character. |
-| `,` | Input | Read a byte from standard input. |
-| `[` | Loop start | Skip the loop if the active cell is zero. |
-| `]` | Loop end | Return to the matching `[` if the active cell is nonzero. |
-
-These instructions follow the conventional Brainf*** execution model.
-
-Existing Brainf*** programs using the standard instruction set remain compatible with JJL.
-
-### 3.2 Extended Instructions
-
-| Instruction | Name | Description |
-|---|---|---|
-| `@` | Absolute navigation | Jump directly to an absolute memory address. |
-| `$` | Memory inspection | Evaluate the active cell's numerical value without modifying it. |
-| `*` | Multiplier | Expand an arithmetic operation into multiples of ten. |
-| `==` | Equality | Compare two operands for equality. |
-| `!=` | Inequality | Compare two operands for inequality. |
-| `:` | Conditional separator | Separate the condition and its execution branches. |
-
-The extended instructions are designed to reduce repetitive operations while retaining JJL's compact syntax.
-
----
-
-## 4. Absolute Memory Navigation
-
-### The `@` Operator
-
-Repeated `@` symbols move the pointer directly to an absolute memory address.
-
-The number of symbols determines the destination.
+Repeated `@` symbols select an absolute memory cell. Count the symbols, then subtract one:
 
 | Syntax | Destination |
 |---|---|
@@ -125,56 +88,22 @@ For example:
 @@@@@ +++
 ```
 
-This initializes:
+This initializes Cell 0 to 5, Cell 2 to 10, and Cell 4 to 3. Absolute navigation does not visit the cells in between; the pointer goes straight to its destination. No sightseeing required.
 
-- Cell 0 to 5.
-- Cell 2 to 10.
-- Cell 4 to 3.
+### Inspect a value without consuming it
 
-Absolute navigation does not require intermediate pointer movements.
-
-The pointer simply arrives at its destination. No sightseeing required.
-
----
-
-## 5. Memory Inspection
-
-### The `$` Operator
-
-The `$` operator evaluates the numerical value stored in the currently active cell.
-
-It does not modify the cell or move the pointer.
-
-This allows programs to inspect memory without consuming or altering its contents.
-
-Example:
+`$` evaluates the active cell's numeric value without modifying the cell or moving the pointer. It is particularly useful inside a condition:
 
 ```jjl
 @ +++++
 $ == +++++ : @@@ : @@
 ```
 
-The condition compares the active cell against the integer literal `5`.
+The condition compares the active cell's value with the integer literal 5. If they are equal, the pointer jumps to Cell 2 (`@@@`); otherwise, it jumps to Cell 1 (`@@`).
 
-If the values are equal, execution jumps to Cell 2.
+### Count arithmetic in tens
 
-Otherwise, execution jumps to Cell 1.
-
-Memory inspection is particularly useful in conditional expressions.
-
----
-
-## 6. Multiplier Arithmetic
-
-### The `*` Operator
-
-JJL introduces multiplier chains to simplify repetitive arithmetic operations.
-
-Each `*` appended to a `+` or `-` operation contributes an additional multiple of ten.
-
-Trailing arithmetic operators contribute individual increments or decrements.
-
-### Examples
+Append `*` symbols to a `+` or `-` operation to build multiples of ten. Each star contributes another ten in that direction; trailing `+` or `-` operations add the individual adjustments.
 
 | Expression | Result |
 |---|---:|
@@ -185,80 +114,29 @@ Trailing arithmetic operators contribute individual increments or decrements.
 | `-**` | -20 |
 | `-**--` | -22 |
 
-The multiplier mechanism reduces the number of instructions required for common arithmetic operations.
+`+**` means **+20**, not +100. The stars accumulate tens; they are not exponentiation. Multiplier chains reduce repetitive instructions and make numeric assignments easier to scan.
 
-It also makes numerical assignments considerably easier to read.
+See [Canonical coding style](#canonical-coding-style) for conventions that keep these chains readable.
 
-For canonical arithmetic formatting conventions, see [Canonical Coding Style](#9-canonical-coding-style).
+### Choose a branch with an inline condition
 
----
-
-## 7. Conditional Expressions
-
-JJL supports inline conditional expressions using equality and inequality comparisons.
-
-This allows programs to evaluate values and select an execution branch without constructing additional loops.
-
-### 7.1 Syntax
-
-The general syntax is:
+The general form is:
 
 ```jjl
 LEFT_OPERAND OPERATOR RIGHT_OPERAND : IF_ACTION : ELSE_ACTION
 ```
 
-The interpreter evaluates both operands and performs the comparison.
+The interpreter evaluates both operands and applies the comparison. A true result executes the IF action; a false result executes the ELSE action.
 
-If the condition is true, the IF action executes.
-
-Otherwise, the ELSE action executes.
-
-Each branch executes a single instruction.
-
-### 7.2 Supported Comparison Operators
-
-| Operator | Meaning |
-|---|---|
-| `==` | Equal to |
-| `!=` | Not equal to |
-
-### 7.3 Supported Operands
-
-| Operand | Meaning |
-|---|---|
-| `$` | Value of the active cell |
-| `@` | Value stored in Cell 0 |
-| `@@` | Value stored in Cell 1 |
-| `@@@` | Value stored in Cell 2 |
-| `<` | Value of the left neighboring cell |
-| `>` | Value of the right neighboring cell |
-| `+` | Positive integer literal |
-| `-` | Negative integer literal |
-
-Repeated `@` symbols reference successive absolute memory addresses.
-
-Repeated `+` and `-` symbols represent signed integer literals.
-
-Relative neighbor operands inspect adjacent cells without moving the pointer.
-
-### 7.4 One-Line Conditional
-
-For simple conditions and short branches, use the compact form:
+For a short condition, keep the expression on one line:
 
 ```jjl
 $ == @@ : @@@ : @@@@
 ```
 
-This compares the active cell against Cell 1.
+This compares the active cell with Cell 1. Equality selects Cell 2; inequality selects Cell 3.
 
-- If equal, jump to Cell 2.
-- Otherwise, jump to Cell 3.
-
-The one-line form is intended for straightforward conditional operations.
-
-### 7.5 Expanded Conditional Formatting
-
-When a conditional expression becomes difficult to read, use the expanded layout.
+When that becomes difficult to read, spread the same expression over three lines:
 
 ```jjl
 $ == @@
@@ -266,23 +144,14 @@ $ == @@
 : @@@@
 ```
 
-The three-line convention separates the comparison from its two branches.
+The first line is the comparison, the second is the true branch, and the third is the false branch. The colons keep their normal syntactic meaning across the line breaks.
 
-This formatting is especially useful when documenting longer expressions or when the individual branches require additional explanation.
+> [!IMPORTANT]
+> **Each conditional branch executes one instruction in the current JJLI implementation.** Expanded formatting improves readability; it does not turn a branch into a multi-instruction block.
 
-The colon delimiters retain their normal syntactic meaning.
+### Add comments and whitespace
 
-**Note:** Expanded formatting is a readability convention. Each conditional branch still executes one instruction under the current JJLI implementation.
-
----
-
-## 8. Comments and Whitespace
-
-JJL supports comments beginning with `#`.
-
-Comments extend to the end of the line and are ignored during execution.
-
-Example:
+Comments begin with `#` and continue to the end of the line. JJLI ignores them during execution:
 
 ```jjl
 # Initialize comparison values
@@ -295,77 +164,127 @@ Example:
 @ $ == @@ : @@@ : @@@@
 ```
 
-Whitespace may be used to separate instructions and improve source readability.
+Whitespace separates instructions and makes source easier to read. Canonical JJL uses spacing and comments to explain assignments and conditions without changing the instruction model.
 
-Canonical JJL programs use whitespace and comments to make memory assignments and conditional expressions easier to understand.
+## Reference
 
----
+### Standard instructions
 
-## 9. Canonical Coding Style
+JJL retains the eight fundamental Brainf\*\*\* instructions:
 
-JJL uses a small collection of formatting conventions intended to keep programs compact, consistent, and readable.
+| Instruction | Operation | Description |
+|---|---|---|
+| `>` | Move right | Advance the memory pointer by one cell. |
+| `<` | Move left | Move the memory pointer back by one cell. |
+| `+` | Increment | Increase the active cell by one. |
+| `-` | Decrement | Decrease the active cell by one. |
+| `.` | Output | Print the active cell as an ASCII character. |
+| `,` | Input | Read a byte from standard input. |
+| `[` | Loop start | Skip the loop if the active cell is zero. |
+| `]` | Loop end | Return to the matching `[` if the active cell is nonzero. |
 
-### Rule 1: Prefer Nearby Multiples of Ten
+The instructions follow the conventional execution model. Programs using the standard instruction set remain compatible without needing the extended JJL operators.
 
-When assigning ASCII values, construct the target value from a nearby multiple of ten.
+### Extended instructions
 
-**Non-canonical:**
+| Instruction | Name | Description |
+|---|---|---|
+| `@` | Absolute navigation | Jump directly to an absolute memory address. |
+| `$` | Memory inspection | Evaluate the active cell's numerical value without modifying it. |
+| `*` | Multiplier | Expand an arithmetic operation into multiples of ten. |
+| `==` | Equality | Compare two operands for equality. |
+| `!=` | Inequality | Compare two operands for inequality. |
+| `:` | Conditional separator | Separate the condition and its execution branches. |
+
+These additions reduce repetition while keeping the syntax compact. Remember that `.` outputs an ASCII character, while `$` evaluates a numeric value for inspection and comparison.
+
+### Comparison operators
+
+| Operator | Meaning |
+|---|---|
+| `==` | Equal to |
+| `!=` | Not equal to |
+
+### Conditional operands
+
+| Operand | Meaning |
+|---|---|
+| `$` | Value of the active cell |
+| `@` | Value stored in Cell 0 |
+| `@@` | Value stored in Cell 1 |
+| `@@@` | Value stored in Cell 2 |
+| `<` | Value of the left neighboring cell |
+| `>` | Value of the right neighboring cell |
+| `+` | Positive integer literal |
+| `-` | Negative integer literal |
+
+Repeated `@` operands reference successive absolute addresses: one `@` reads Cell 0, two read Cell 1, and so on. In a condition, these operands provide stored values; as navigation instructions, `@` sequences move the pointer.
+
+Repeated `+` and `-` symbols form signed integer literals. Relative `<` and `>` operands inspect neighboring cells **without moving the pointer**; the same symbols used as ordinary instructions move it.
+
+### Canonical coding style
+
+The conventions below keep JJL compact, consistent, and readable. They describe formatting style rather than adding new instructions.
+
+#### Prefer nearby multiples of ten
+
+When building ASCII values, start from a nearby multiple of ten and apply a small correction.
+
+Non-canonical:
 
 ```jjl
 +*******++++++++
 ```
 
-**Canonical:**
+Canonical:
 
 ```jjl
 +********--
 ```
 
-Both produce 78, corresponding to the ASCII character `N`.
+Both produce 78, the ASCII value for `N`. The canonical form makes the intended value easier to count.
 
-The canonical form uses a nearby multiple of ten and a small correction.
-
-### Rule 2: Consolidate Multiplier Chains
+#### Consolidate multiplier chains
 
 Avoid repeating individual multiplier blocks.
 
-**Non-canonical:**
+Non-canonical:
 
 ```jjl
 +*+*+*
 ```
 
-**Canonical:**
+Canonical:
 
 ```jjl
 +***
 ```
 
-Both represent an increment of 30.
+Both increment by 30. One consolidated chain is easier to read than three separate ten-unit blocks.
 
-### Rule 3: Align Sequential Assignments
+#### Align sequential assignments
 
-Use whitespace to align memory addresses and their corresponding operations.
+Use whitespace to align addresses with their operations:
 
 ```jjl
-@ +********--
-@@ +*******++++
+@   +********--
+@@  +*******++++
 @@@ +***+++
 ```
 
 Consistent alignment makes sequential memory initialization easier to scan.
 
-### Rule 4: Keep Small Loops Compact
+#### Keep small loops compact
 
-Short loops should remain on a single line.
+A short loop can stay on one line:
 
 ```jjl
 [-]
 ```
 
-### Rule 5: Format Complex Loops Structurally
+#### Give complex loops a structure
 
-Longer loops should use dedicated opening and closing brackets with two-space indentation.
+Use dedicated opening and closing brackets with two-space indentation for longer loops:
 
 ```jjl
 [
@@ -374,9 +293,11 @@ Longer loops should use dedicated opening and closing brackets with two-space in
 ]
 ```
 
-### Rule 6: Separate Complex Conditional Branches
+The indentation makes the loop body visible without changing execution.
 
-Use the expanded conditional layout when a comparison or its branches would become difficult to read in a single line.
+#### Separate complex conditional branches
+
+Use the expanded form when a comparison or its branches becomes difficult to read on one line:
 
 ```jjl
 $ == @@
@@ -384,18 +305,18 @@ $ == @@
 : @@@@
 ```
 
-Keep the condition and branches visually distinct.
+Keep the condition and its two branches visually distinct. Each branch still executes one instruction.
 
----
+## Examples
 
-## 10. Complete Example: YES / NO
+### Select an ASCII Y or N
 
-The following program initializes two comparison values, checks whether they are equal, and prints the corresponding result.
+This program initializes comparison values, checks equality, and selects the corresponding output character:
 
 ```jjl
-@@@ +********----
+@@@ [-]
 @@@@ +********--
-@@@@@ +********+
+@@@@@ +*********-
 
 @ +++++
 @@ +++++
@@ -405,21 +326,19 @@ The following program initializes two comparison values, checks whether they are
 .
 ```
 
-### Expected Output
-
-When both comparison values are equal:
+When the comparison values are equal, the output is:
 
 ```text
 Y
 ```
 
-When the values differ:
+If you change one comparison value so the two differ, the output is:
 
 ```text
 N
 ```
 
-### Memory Layout
+The example selects one character, `Y` or `N`, rather than printing the full words “YES” and “NO.” Its memory layout is:
 
 | Cell | Value | Purpose |
 |---|---:|---|
@@ -429,24 +348,31 @@ N
 | 3 | 78 | ASCII `N` |
 | 4 | 89 | ASCII `Y` |
 
-The program demonstrates the core JJL workflow:
+> [!TIP]
+> ASCII `Y` is **89**, built here as `+*********-` (90 − 1). ASCII `N` is **78**, built as `+********--` (80 − 2). Cell 2 is explicitly cleared and left unused so the initialization matches the table.
 
-1. Initialize memory cells.
-2. Navigate directly to relevant addresses.
-3. Evaluate a conditional expression.
-4. Select an output character.
-5. Print the result.
+The program demonstrates the full workflow:
 
-A compact demonstration of memory navigation, arithmetic, comparison, and output.
+1. Initialize the cells used by the example.
+2. Navigate to the comparison values.
+3. Evaluate a condition without changing those values.
+4. Move to the selected output cell.
+5. Print its ASCII character with `.`.
 
----
+## Good to know
 
-## 11. Design Philosophy
+> [!IMPORTANT]
+> The same compact symbols can have different roles in context. `@` navigates as an instruction but reads an addressed cell as a conditional operand. `<` and `>` move the pointer as instructions but inspect neighbors as operands. `$` inspects a numeric value; `.` prints a character.
 
-JJL is designed to remain **backwards compatible with Brainf***** while extending its original instruction model with additional capabilities.
+- Cell arithmetic wraps within 0–255; it does not grow into an unrestricted integer stored in the tape.
+- Memory addresses are zero-based, and negative pointer positions are not allowed.
+- Dynamic expansion grows the tape in blocks of 1,024 cells from its initial 32,768-cell size.
+- Conditional branches execute one instruction, whether written on one line or three.
+- Comments run from `#` to the end of the line; whitespace is available for readability.
+- Brainf\*\*\* programs using the standard eight instructions do not need the extensions.
 
-The language preserves the familiar tape-based execution model and introduces optional operators for absolute navigation, multiplier arithmetic, memory inspection, and conditional branching.
+## Design notes
 
-Existing Brainf*** programs can therefore be used without requiring the extended JJL instructions.
+JJL preserves the minimal tape-based execution model of Brainf\*\*\* and adds optional conveniences around it. Absolute navigation, multiplier arithmetic, inspection, and conditional branching give you more control over memory access and common operations without requiring the extended syntax in existing programs.
 
-JJL remains intentionally minimal, with its additional features focused on reducing repetitive operations and improving readability.
+The language stays compact and unconventional, with its additions focused on reducing repetition and improving readability. You still know exactly which cells and instructions are involved. Whether that makes the programming choices more defensible is outside the interpreter's jurisdiction.
